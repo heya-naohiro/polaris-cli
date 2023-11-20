@@ -9,6 +9,7 @@ import (
 	"path/filepath"
 
 	"github.com/blugelabs/bluge"
+	"github.com/ikawaha/blugeplugin/analysis/lang/ja"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 )
@@ -76,7 +77,7 @@ func (s *seacher) AddDocument(path string) {
 	}
 	//fmt.Println(string(data))
 	doc := bluge.NewDocument(path).
-		AddField(bluge.NewTextField("body", string(data)))
+		AddField(bluge.NewTextField("body", string(data)).WithAnalyzer(ja.Analyzer()))
 
 	err = s.Writer.Update(doc.ID(), doc)
 	if err != nil {
@@ -92,7 +93,7 @@ func (s *seacher) QueryPrint(q string) {
 	}
 	defer reader.Close()
 
-	query := bluge.NewMatchQuery(q).SetField("body")
+	query := bluge.NewMatchQuery(q).SetAnalyzer(ja.Analyzer()).SetField("body")
 	request := bluge.NewTopNSearch(10, query).
 		WithStandardAggregations()
 	documentMatchIterator, err := reader.Search(context.Background(), request)
